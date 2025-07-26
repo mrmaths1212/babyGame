@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulaire</title>
+</head>
+<body>
+  <h1>Bienvenue</h1>
+  <form id="form">
+    <label>Prénom : <input type="text" name="prenom" required></label><br><br>
+    <label>Poids (kg) : <input type="number" name="poids" step="0.1" required></label><br><br>
+    <label>Taille (cm) : <input type="number" name="taille" step="0.1" required></label><br><br>
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+    document.getElementById("form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const obj = Object.fromEntries(formData.entries());
+
+      obj.poids = parseFloat(obj.poids);
+      obj.taille = parseFloat(obj.taille);
+
+      const response = await fetch("/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(obj)
+      });
+
+      const text = await response.text();
+      document.getElementById("response").innerText = text;
+    });
+  </script>
+</body>
+</html>
