@@ -1,38 +1,137 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Formulaire</title>
-</head>
-<body>
-  <h1>Bienvenue</h1>
-  <form id="form">
-    <label>Prénom : <input type="text" name="prenom" required></label><br><br>
-    <label>Poids (kg) : <input type="number" name="poids" step="0.1" required></label><br><br>
-    <label>Taille (cm) : <input type="number" name="taille" step="0.1" required></label><br><br>
-    <button type="submit">Envoyer</button>
-  </form>
+  <meta charset="UTF-8" />
+  <title>Formulaire baby</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f7f9fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
 
-  <p id="response"></p>
+    .container {
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
 
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      border-color: #4a90e2;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      background: #4a90e2;
+      color: white;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #357abd;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 500;
+      color: green;
+    }
+  </style>
   <script>
-    document.getElementById("form").addEventListener("submit", async function (e) {
+    async function envoyerFormulaire(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      const obj = Object.fromEntries(formData.entries());
 
-      obj.poids = parseFloat(obj.poids);
-      obj.taille = parseFloat(obj.taille);
+      const votrePrenom = document.getElementById("votrePrenom").value.trim();
+      const votreNom = document.getElementById("votreNom").value.trim();
 
-      const response = await fetch("/submit", {
+      const prenom = document.getElementById("prenom").value.trim();
+      const poids = parseFloat(document.getElementById("poids").value);
+      const taille = parseFloat(document.getElementById("taille").value);
+      const naissance = document.getElementById("naissance").value;
+
+      const messageEl = document.getElementById("message");
+      messageEl.textContent = "";
+
+      if (!votrePrenom ||!votreNom || !prenom || isNaN(poids) || isNaN(taille) || !naissance) {
+        messageEl.textContent = "Veuillez remplir tous les champs correctement.";
+        messageEl.style.color = "red";
+        return;
+      }
+
+      const res = await fetch("/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(obj)
+        body: JSON.stringify({ votrePrenom, votreNom, prenom, poids, taille, naissance}),
       });
 
-      const text = await response.text();
-      document.getElementById("response").innerText = text;
-    });
+      const text = await res.text();
+      messageEl.textContent = text;
+      messageEl.style.color = "green";
+      document.querySelector("form").reset();
+    }
   </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Formulaire Baby</h1>
+    <form onsubmit="envoyerFormulaire(event)">
+      <label for="votrePrenom">Votre prénom</label>
+      <input id="votrePrenom" name="votrePrenom" required />
+      <label for="votreNom">Votre nom</label>
+      <input id="votreNom" name="votreNom" required />
+      <label for="prenom">Comment va s'appeler notre super girl ?</label>
+      <input id="prenom" required />
+
+      <label for="poids">Quel sera son super poids ?</label>
+      <input id="poids" type="number" step="0.1" required />
+
+      <label for="taille">Et sa super taille ?</label>
+      <input id="taille" type="number" step="0.1" required />
+      <label for="naissance">Elle pointera le bout de son nez le:</label>
+      <input id="naissance" type="date" required />
+
+      <button type="submit">Envoyer</button>
+      <div id="message" class="message"></div>
+    </form>
+  </div>
 </body>
 </html>

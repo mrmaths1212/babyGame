@@ -3,51 +3,42 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 )
 
+// Structure pour les données utilisateur
 type FormData struct {
-	Prenom string  `json:"prenom"`
-	Poids  float64 `json:"poids"`
-	Taille float64 `json:"taille"`
+	VotrePrenom string  `json:"votrePrenom"`
+	VotreNom    string  `json:"votreNom"`
+	Prenom      string  `json:"prenom"`
+	Poids       float64 `json:"poids"`
+	Taille      float64 `json:"taille"`
+	Naissance   string  `json:"naissance"`
 }
 
 var (
-	dataFile = "data.json"
-	mu       sync.Mutex
+	dataFile = "data/results.json"
+	dataLock sync.Mutex
 )
 
-func saveData(entry FormData) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	// Lire les données existantes
-	var data = make(map[string]FormData)
-	file, err := os.Open(dataFile)
-	if err == nil {
-		defer file.Close()
-		json.NewDecoder(file).Decode(&data)
-	} else {
-		data = make(map[string]FormData)
-	}
-
-	// Ajouter ou mettre à jour l'entrée
-	data[entry.Prenom] = entry
-
-	// Réécrire le fichier
-	file, err = os.Create(dataFile)
+// GET / → affiche la page HTML
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	tmplPath := filepath.Join("templates", "index.html")
+	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
-		return err
+		http.Error(w, "Erreur de template", 500)
+		return
 	}
-	defer file.Close()
-
-	return json.NewEncoder(file).Encode(data)
+	tmpl.Execute(w, nil)
 }
 
+// POST /submit → enregistre les données
 func formHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
@@ -55,26 +46,57 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var entry FormData
-	body, _ := io.ReadAll(r.Body)
-	err := json.Unmarshal(body, &entry)
+	err := json.NewDecoder(r.Body).Decode(&entry)
 	if err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
 
+	// Sauvegarder dans le fichier
 	err = saveData(entry)
 	if err != nil {
-		http.Error(w, "Erreur enregistrement", http.StatusInternalServerError)
+		http.Error(w, "Erreur d'enregistrement", http.StatusInternalServerError)
 		return
 	}
+	log.Printf("Données reçues: %+v\n", entry)
 
-	fmt.Fprintf(w, "Données enregistrées avec succès.")
+	w.Write([]byte("Données enregistrées."))
+}
+
+// Enregistre les données dans data/results.json
+func saveData(entry FormData) error {
+	dataLock.Lock()
+	defer dataLock.Unlock()
+
+	// Charger les anciennes données
+	var all map[string]FormData = make(map[string]FormData)
+
+	file, err := os.ReadFile(dataFile)
+	if err == nil && len(file) > 0 {
+		_ = json.Unmarshal(file, &all)
+	}
+	key := fmt.Sprintf("%s.%s", entry.VotrePrenom, entry.VotreNom)
+	key = strings.ToLower(strings.ReplaceAll(key, " ", ""))
+
+	// Mettre à jour ou ajouter
+	all[key] = entry
+
+	// Réécrire le fichier
+	output, err := json.MarshalIndent(all, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(dataFile, output, 0644)
 }
 
 func main() {
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	// Router
+	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/submit", formHandler)
 
-	fmt.Println("Serveur démarré sur http://localhost:8080")
+	// Fichiers statiques (JS/CSS)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	log.Println("Serveur démarré sur http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
