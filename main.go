@@ -20,6 +20,7 @@ type FormData struct {
 	Poids       float64 `json:"poids"`
 	Taille      float64 `json:"taille"`
 	Naissance   string  `json:"naissance"`
+	AccessKey   string  `json:"accessKey"`
 }
 
 var (
@@ -52,6 +53,10 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if entry.AccessKey != "babygirl2025" {
+		http.Error(w, "Token invalide", http.StatusForbidden)
+		return
+	}
 	// Sauvegarder dans le fichier
 	err = saveData(entry)
 	if err != nil {
@@ -91,7 +96,7 @@ func saveData(entry FormData) error {
 
 func main() {
 	// Router
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/baby-2025-xYz42", indexHandler)
 	http.HandleFunc("/submit", formHandler)
 
 	// Fichiers statiques (JS/CSS)

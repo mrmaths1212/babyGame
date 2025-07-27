@@ -1,0 +1,29 @@
+# Utilise une image Go officielle
+FROM golang:1.22 as builder
+
+# Répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copie les fichiers
+COPY . .
+
+# Compilation du binaire
+RUN go build -o server
+
+# Étape finale - image légère
+FROM debian:bullseye-slim
+
+# Installer uniquement ce qu'il faut
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Copier le binaire depuis l'étape précédente
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/templates /app/templates
+COPY --from=builder /app/static /app/static
+COPY --from=builder /app/data /app/data
+
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["./server"]
