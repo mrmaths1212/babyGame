@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 # Copier le binaire depuis l'étape précédente
 COPY --from=builder /app/server /app/server
 COPY --from=builder /app/templates /app/templates
-COPY --from=builder /app/static /app/static
 COPY --from=builder /app/data /app/data
 
 WORKDIR /app
