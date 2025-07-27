@@ -1,5 +1,5 @@
 # Utilise une image Go officielle
-FROM golang:1.22 as builder
+FROM golang:1.24.5 as builder
 
 # Répertoire de travail dans le conteneur
 WORKDIR /app
