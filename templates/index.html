@@ -2,9 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Formulaire baby</title>
+  <title>It's a bird? no, it's a plane? It's SUPERGIRL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    .hidden-message { 
+      display: none; 
+    }
     body {
       font-family: "Segoe UI", sans-serif;
       background: #f7f9fb;
@@ -87,6 +90,7 @@
       const poids = parseFloat(document.getElementById("poids").value);
       const taille = parseFloat(document.getElementById("taille").value);
       const naissance = document.getElementById("naissance").value;
+      const bonus = document.getElementById("bonus").value.trim()
       const accessKey = document.getElementById("accessKey").value.trim();
       const messageEl = document.getElementById("message");
       messageEl.textContent = "";
@@ -103,16 +107,23 @@
         body: JSON.stringify({ votrePrenom, votreNom, prenom, poids, taille, naissance, accessKey }),
       });
 
-      const text = await res.text();
-      messageEl.textContent = text;
-      messageEl.style.color = "green";
-      document.querySelector("form").reset();
-    }
+      if (res.ok){
+        window.location.href = "/confirmation";
+      }else{}
+        const text = await res.text();
+        alert(text || "Erreur lors de l'envoi.");
+      }
   </script>
 </head>
 <body>
-  <div class="container">
-    <h1>Formulaire Baby</h1>
+  <div class="hidden-message">
+    Salut à toi qui lis le code source 👀 Bravo, voici l'indice: Les lettres importantes sont LKE, connais tu 2001, l'odyssée de l'espace ?-->
+  </div>
+    <div class="container">
+    <h1>It's a bird... It's a plane... It's SUPERGIRL<sup><a href="https://en.wikipedia.org/wiki/It%27s_a_Bird..._It%27s_a_Plane..._It%27s_Superman" target="_blank" rel="noopener noreferrer">
+          ref
+        </a></sup></h1>
+      
     <form onsubmit="envoyerFormulaire(event)">
       <label for="votrePrenom">Votre prénom</label>
       <input id="votrePrenom" name="votrePrenom" required />
@@ -128,6 +139,12 @@
       <input id="taille" type="number" step="0.1" required />
       <label for="naissance">Elle pointera le bout de son nez le:</label>
       <input id="naissance" type="date" required />
+      <label for="bonus">Pour des points bonus, il y a une énigme cachée quelque part. 
+        <a href="https://support.google.com/surveys/answer/6172725?hl=fr" target="_blank" rel="noopener noreferrer">
+          Code source
+        </a>
+      </label>
+      <input id="bonus"/>
       <label for="accessKey">Mot de passe</label>
       <input id="accessKey"  required />
       <button type="submit">Envoyer</button>

@@ -20,6 +20,7 @@ type FormData struct {
 	Poids       float64 `json:"poids"`
 	Taille      float64 `json:"taille"`
 	Naissance   string  `json:"naissance"`
+	Bonus       string  `json:bonus`
 	AccessKey   string  `json:"accessKey"`
 }
 
@@ -54,7 +55,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if entry.AccessKey != "babygirl2025" {
-		http.Error(w, "Token invalide", http.StatusForbidden)
+		http.Error(w, "Pwd invalide", http.StatusUnauthorized)
 		return
 	}
 	// Sauvegarder dans le fichier
@@ -63,8 +64,6 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erreur d'enregistrement", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Données reçues: %+v\n", entry)
-
 	w.Write([]byte("Données enregistrées."))
 }
 
@@ -94,11 +93,20 @@ func saveData(entry FormData) error {
 	return os.WriteFile(dataFile, output, 0644)
 }
 
+func confirmationHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join("templates", "confirmation.html"))
+	if err != nil {
+		http.Error(w, "Erreur template confirmation", 500)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
+
 func main() {
 	// Router
 	http.HandleFunc("/baby-2025-xYz42", indexHandler)
 	http.HandleFunc("/submit", formHandler)
-
+	http.HandleFunc("/confirmation", confirmationHandler)
 	// Fichiers statiques (JS/CSS)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
