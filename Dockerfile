@@ -8,8 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Compilation du binaire
-RUN go build -o server
-
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server
 # Étape finale - image légère
 FROM debian:bullseye-slim
 
