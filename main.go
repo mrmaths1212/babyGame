@@ -104,7 +104,7 @@ func confirmationHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Router
-	http.HandleFunc("/baby-2025-xYz42", indexHandler)
+	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/submit", formHandler)
 	http.HandleFunc("/confirmation", confirmationHandler)
 	// Fichiers statiques (JS/CSS)
