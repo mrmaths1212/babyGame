@@ -20,7 +20,8 @@ type FormData struct {
 	Poids       float64 `json:"poids"`
 	Taille      float64 `json:"taille"`
 	Naissance   string  `json:"naissance"`
-	Bonus       string  `json:bonus`
+	Bonus       string  `json:"bonus"`
+	Email       string  `json:"email"`
 	AccessKey   string  `json:"accessKey"`
 }
 

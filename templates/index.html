@@ -91,6 +91,8 @@
       const taille = parseFloat(document.getElementById("taille").value);
       const naissance = document.getElementById("naissance").value;
       const bonus = document.getElementById("bonus").value.trim()
+      const email = document.getElementById("email").value.trim();
+
       const accessKey = document.getElementById("accessKey").value.trim();
       const messageEl = document.getElementById("message");
       messageEl.textContent = "";
@@ -104,7 +106,7 @@
       const res = await fetch("/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ votrePrenom, votreNom, prenom, poids, taille, naissance, accessKey }),
+        body: JSON.stringify({ votrePrenom, votreNom, prenom, poids, taille, naissance, bonus, email, accessKey }),
       });
 
       if (res.ok){
@@ -145,6 +147,8 @@
         </a>
       </label>
       <input id="bonus"/>
+      <label for="email">Votre email</label>
+      <input id="email" name="email" type="email" required />
       <label for="accessKey">Mot de passe</label>
       <input id="accessKey"  required />
       <button type="submit">Envoyer</button>
